@@ -1,0 +1,72 @@
+python-igraph 小试牛刀
+
+1.首先明确igraph能做什么，为何使用。
+2.安装。
+3.测试。
+
+Installing collected packages: python-igraph
+  Running setup.py install for python-igraph
+Successfully installed python-igraph-0.7.1-4
+vonzhou@CHOWN:~$ python
+Python 2.7.3 (default, Dec 18 2014, 19:03:52) 
+[GCC 4.6.3] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import igraph
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ImportError: No module named igraph
+
+主要是igraph安装在了其他版本下面，SO下面这样。
+vonzhou@CHOWN:~$ python3
+Python 3.2.3 (default, Feb 27 2014, 21:33:50) 
+[GCC 4.6.3] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+>>> igraph
+<module 'igraph' from '/usr/local/lib/python3.2/dist-packages/igraph/__init__.py'>
+>>> from igraph import *
+>>> g=Graph(1)
+>>> g
+<igraph.Graph object at 0x9e4cf2c>
+>>> print(g)
+IGRAPH U--- 1 0 --
+>>> g.add_vertices(2)
+>>> print(g)
+IGRAPH U--- 3 0 --
+>>> g.add_edges([(0,1),(1,2)])
+>>> print(g)
+IGRAPH U--- 3 2 --
++ edges:
+0--1 1--2
+>>> f=open("test.net","w")
+>>> g.write_pajek(f)
+>>> 
+
+所以一个简单的Pajek .net file 就生成了，下一步就是编码从数据库中取出对应的数据，然后构造成Graph，继而得到最终可供分析的文件，比较简单。
+
+
+1.安装mysql：sudo apt-get install mysql-server;
+登录：mysql -uroot -p
+2.导入已有数据：source <path to you sql file>,静静等候导入完成；
+3.导入完成后，明确表结构：
+show tables;
+desc tablename;
+
+4.下面在python程序中进行具体的业务处理。
+(1)从数据库把需要的数据导出到文件中;
+（2）具体由数据生成Graph，从而可以得到我们需要的Pajek .net文件。这里面的难点在于：不能以ID的最大值作为vertex的数目，构造Graph，因为值太大，所以只能用ID作为vertex的“name”属性，但是add edge的时候又需要具体的vertex id所以需要我们自己使用一个字典保存二者之间的映射关系;
+（3）慢慢等待，毕竟是30M的文件，有1391718行（通过wc -l file命令）;
+5.得到.net file 之后，用Pajek工具导入，可以看到网络图，进行自己需要的分析。
+
+
+
+
+参考：
+1.Tutorial — python-igraph v0.6 documentation
+
+
+
+
+
+
+
+
